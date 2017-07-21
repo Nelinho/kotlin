@@ -1379,14 +1379,15 @@ public inline fun <T> Iterable<T>.all(predicate: (T) -> Boolean): Boolean {
  * Returns `true` if collection has at least one element.
  */
 public fun <T> Iterable<T>.any(): Boolean {
-    for (element in this) return true
-    return false
+    if (this is Collection && isEmpty()) return false
+    return iterator().hasNext()
 }
 
 /**
  * Returns `true` if at least one element matches the given [predicate].
  */
 public inline fun <T> Iterable<T>.any(predicate: (T) -> Boolean): Boolean {
+    if (this is Collection && this.isEmpty()) return false
     for (element in this) if (predicate(element)) return true
     return false
 }
@@ -1663,14 +1664,15 @@ public fun <T> Iterable<T>.minWith(comparator: Comparator<in T>): T? {
  * Returns `true` if the collection has no elements.
  */
 public fun <T> Iterable<T>.none(): Boolean {
-    for (element in this) return false
-    return true
+    if (this is Collection && isEmpty()) return true
+    return !iterator().hasNext()
 }
 
 /**
  * Returns `true` if no elements match the given [predicate].
  */
 public inline fun <T> Iterable<T>.none(predicate: (T) -> Boolean): Boolean {
+    if (this is Collection && this.isEmpty()) return true
     for (element in this) if (predicate(element)) return false
     return true
 }

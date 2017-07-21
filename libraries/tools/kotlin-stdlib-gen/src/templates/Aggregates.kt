@@ -24,8 +24,13 @@ fun aggregates(): List<GenericFunction> {
 
         doc { f -> "Returns `true` if no ${f.element.pluralize()} match the given [predicate]." }
         returns("Boolean")
-        body {
+        body { f ->
             """
+            ${when (f) {
+                Iterables -> "if (this is Collection && this.isEmpty()) return true"
+                Maps, CharSequences, ArraysOfObjects, ArraysOfPrimitives -> "if (this.isEmpty()) return true"
+                else -> ""
+            }}
             for (element in this) if (predicate(element)) return false
             return true
             """
@@ -37,10 +42,16 @@ fun aggregates(): List<GenericFunction> {
         doc { f -> "Returns `true` if the ${f.collection} has no ${f.element.pluralize()}." }
         returns("Boolean")
         body {
+            "return !iterator().hasNext()"
+        }
+        body(Iterables) {
             """
-            for (element in this) return false
-            return true
+            if (this is Collection && isEmpty()) return true
+            return !iterator().hasNext()
             """
+        }
+        body(Maps, CharSequences, ArraysOfObjects, ArraysOfPrimitives) {
+            "return isEmpty()"
         }
         include(Maps, CharSequences)
     }
@@ -50,8 +61,13 @@ fun aggregates(): List<GenericFunction> {
 
         doc { f -> "Returns `true` if at least one ${f.element} matches the given [predicate]." }
         returns("Boolean")
-        body {
+        body { f ->
             """
+            ${when (f) {
+                Iterables -> "if (this is Collection && this.isEmpty()) return false"
+                Maps, CharSequences, ArraysOfObjects, ArraysOfPrimitives -> "if (this.isEmpty()) return false"
+                else -> ""
+            }}
             for (element in this) if (predicate(element)) return true
             return false
             """
@@ -63,10 +79,16 @@ fun aggregates(): List<GenericFunction> {
         doc { f -> "Returns `true` if ${f.collection} has at least one ${f.element}." }
         returns("Boolean")
         body {
+            "return iterator().hasNext()"
+        }
+        body(Iterables) {
             """
-            for (element in this) return true
-            return false
+            if (this is Collection && isEmpty()) return false
+            return iterator().hasNext()
             """
+        }
+        body(Maps, CharSequences, ArraysOfObjects, ArraysOfPrimitives) {
+            "return !isEmpty()"
         }
         include(Maps, CharSequences)
     }
